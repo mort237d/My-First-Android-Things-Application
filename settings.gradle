@@ -1,0 +1,2 @@
+rootProject.name='My First Android Things Application'
+include ':app'
