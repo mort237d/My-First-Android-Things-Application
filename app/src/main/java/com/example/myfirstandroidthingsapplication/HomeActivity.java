@@ -43,13 +43,17 @@ public class HomeActivity extends Activity {
 
         //Oversigt over tilgængelige perifere enheder
         PeripheralManager manager = PeripheralManager.getInstance();
+
+        //Udskriver alle GPIO'er i loggen
         Log.d(TAG, "Available GPIO: " + manager.getGpioList());
 
         Switch ledSwitch = findViewById(R.id.ledSwitch);
         try {
+            //Definere hvilken pin der går til LED'en og hvilken vej den skal gå
             final Gpio ledGpio = manager.openGpio("BCM18");
             ledGpio.setDirection(Gpio.DIRECTION_OUT_INITIALLY_LOW);
 
+            //Lytter om switchen ændrer sig og sætter LED til samme stadie
             ledSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
