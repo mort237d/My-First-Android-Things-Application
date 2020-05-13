@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.CompoundButton;
 import android.widget.Switch;
+import android.widget.Toast;
 
 import com.google.android.things.pio.Gpio;
 import com.google.android.things.pio.PeripheralManager;
@@ -41,16 +42,19 @@ public class HomeActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
+        SingleLED();
+    }
+
+    private void SingleLED(){
         //Oversigt over tilgængelige perifere enheder
         PeripheralManager manager = PeripheralManager.getInstance();
 
-        //Udskriver alle GPIO'er i loggen
-        Log.d(TAG, "Available GPIO: " + manager.getGpioList());
-
+        //Switch forbindes med xml switch
         Switch ledSwitch = findViewById(R.id.ledSwitch);
         try {
-            //Definere hvilken pin der går til LED'en og hvilken vej den skal gå
+            //Åbner en GPIO pin 18
             final Gpio ledGpio = manager.openGpio("BCM18");
+            //Sætter retningen for pin 18 til DIRECTION_OUT_INITIALLY_LOW aka setValue(false)
             ledGpio.setDirection(Gpio.DIRECTION_OUT_INITIALLY_LOW);
 
             //Lytter om switchen ændrer sig og sætter LED til samme stadie
@@ -58,14 +62,17 @@ public class HomeActivity extends Activity {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     try {
+                        //LED sættes til samme stadie som switch
                         ledGpio.setValue(isChecked);
                     } catch (IOException e) {
                         e.printStackTrace();
+                        Toast.makeText(HomeActivity.this, "ERROR: " + e.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 }
             });
         } catch (IOException e) {
             e.printStackTrace();
+            Toast.makeText(HomeActivity.this, "ERROR: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
 }
