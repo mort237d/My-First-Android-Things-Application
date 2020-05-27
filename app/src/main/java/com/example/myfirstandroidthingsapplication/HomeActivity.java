@@ -17,25 +17,9 @@ import com.google.android.things.pio.PeripheralManager;
 
 import java.io.IOException;
 
-/**
- * Skeleton of an Android Things activity.
- * <p>
- * Android Things peripheral APIs are accessible through the PeripheralManager
- * For example, the snippet below will open a GPIO pin and set it to HIGH:
- * <p>
- * PeripheralManager manager = PeripheralManager.getInstance();
- * try {
- * Gpio gpio = manager.openGpio("BCM6");
- * gpio.setDirection(Gpio.DIRECTION_OUT_INITIALLY_LOW);
- * gpio.setValue(true);
- * } catch (IOException e) {
- * Log.e(TAG, "Unable to access GPIO");
- * }
- * <p>
- * You can find additional examples on GitHub: https://github.com/androidthings
- */
 public class HomeActivity extends Activity {
     private static final String TAG = "HomeActivity";
+    private Gpio ledGpio;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +37,7 @@ public class HomeActivity extends Activity {
         Switch ledSwitch = findViewById(R.id.ledSwitch);
         try {
             //Åbner en GPIO pin 18
-            final Gpio ledGpio = manager.openGpio("BCM18");
+            ledGpio = manager.openGpio("BCM18");
             //Sætter retningen for pin 18 til DIRECTION_OUT_INITIALLY_LOW aka setValue(false)
             ledGpio.setDirection(Gpio.DIRECTION_OUT_INITIALLY_LOW);
 
@@ -65,14 +49,28 @@ public class HomeActivity extends Activity {
                         //LED sættes til samme stadie som switch
                         ledGpio.setValue(isChecked);
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        Log.e(TAG, "onCheckedChanged: ", e);
                         Toast.makeText(HomeActivity.this, "ERROR: " + e.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 }
             });
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e(TAG, "SingleLED: ", e);
             Toast.makeText(HomeActivity.this, "ERROR: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        // Lukker for ledGpio
+        if (ledGpio != null) {
+            try {
+                ledGpio.close();
+            } catch (IOException e) {
+                Log.e(TAG, "Error on PeripheralIO API", e);
+            }
         }
     }
 }
